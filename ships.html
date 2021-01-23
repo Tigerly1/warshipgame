@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: rgb(194, 115, 115);
+        }
+        div>div {
+            width: 30px;
+            height: 30px;
+            border: 1px solid black;
+            float: left;
+            background-color: blue;
+            text-align:center;
+            color:white;
+        }
+        #ur>div:nth-child(10n+1) {
+            clear: both;
+        }
+        #comp>div:nth-child(10n+1) {
+            clear: both;
+        }
+        .green {
+            color: white;
+            background-color: green;
+            border: 1px solid white;
+        }
+        .black {
+            color: white;
+            background-color: black;
+            border: 1px solid white;
+        }
+.red {
+            color: white;
+            background-color: red;
+            border: 1px solid white;
+        }
+        #ur {
+            position: absolute;
+            left: 200px;
+            font-size: 26px;
+        }
+        #comp {
+            position: absolute;
+            margin-left: 600px;
+            float: left;
+            text-align: center;
+            font-size: 26px;
+        }
+        #statki>div {
+            margin-bottom: 15px;
+            background-color: grey;
+            border: 1px solid white;
+        }
+        button {
+            float:left;
+            width:120px;
+        height: 35px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="statki"></div>
+    <div id="ur"></div>
+    <div id="comp"></div>
+    <script>
+        var statki = {
+            maszty: [4, 3, 3, 2, 2, 2, 1, 1, 1, 1],
+            statki: function () {
+                for (var i = 0; i < this.maszty.length; i++) {
+                    for (var j = 0; j < this.maszty[i]; j++) {
+                        var div = document.createElement("div")
+                        if (j == 0) div.style.clear = "both"
+                        if (i == 0) div.style.backgroundColor = "black"
+                        div.classList.add(i)
+                        div.addEventListener("mouseover", this.hover)
+                        div.addEventListener("click", this.click)
+                        div.addEventListener("mouseout", this.left)
+                        document.getElementById("statki").appendChild(div)
+                    }
+                }
+            },
+            czarny: 4, // ilość zaznaczonych bloków dla wyboru gracza
+            hover: function () {
+                let array = document.getElementsByClassName(event.target.classList[0])
+                for (x = 0; x < array.length; x++) {
+                    if (array[x].style.backgroundColor == "black") break
+                    else {
+                        array[x].style.backgroundColor = "red"
+                    }
+                }
+            },
+            left: function () {
+                let array = document.getElementsByClassName(event.target.classList[0])
+                for (x = 0; x < array.length; x++) {
+                    if (array[x].style.backgroundColor == "black") break
+                    else {
+                        array[x].style.backgroundColor = "grey"
+                    }
+                }
+            },
+            click: function () {
+                let array = document.getElementsByClassName(event.target.classList[0])
+                var c = document.getElementById("statki").children
+                for (i = 0; i < c.length; i++) {
+                    c[i].style.backgroundColor = "grey"
+                }
+                statki.czarny = array.length
+                for (x = 0; x < array.length; x++) {
+                    array[x].style.backgroundColor = "black"
+                }
+            },
+            gracz: [],
+            liczbaprawklik: 10,
+            tablicaklas: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+            htmlgracz: function () {
+                for (let i = 0; i < 10; i++) {
+                    for (let j = 0; j < 10; j++) {
+                        var div = document.createElement("div")
+                        div.setAttribute("id", i + "" + j);
+                        div.addEventListener("mouseover", this.pokaz)
+                        div.addEventListener("contextmenu", function (e) {
+                            e.preventDefault();
+                            if (statki.liczbaprawklik % 2 == 1) {
+                                statki.usunpion()
+                            }
+                            else {
+                                statki.usun()
+                            }
+                            statki.liczbaprawklik++
+                            statki.pokaz()
+                        })
+                        div.addEventListener("click", function () {
+                            if (event.target.classList == "green") {
+                                let array = document.getElementsByClassName(event.target.classList[0])
+                                for (let x = 0; x < array.length; x++) {
+                                    array[x].classList.add("black")
+                                    statki.gracz[+(array[x].id[0])+1][+(array[x].id[1])+1] = 1
+                                }
+                                var kolorczarmystatek = document.getElementById("statki").childNodes
+                                for (let y = 0; y < kolorczarmystatek.length; y++) {
+                                    if (kolorczarmystatek[y].style.backgroundColor == "black") {
+                                        var liczbaklasy = kolorczarmystatek[y].classList[0]
+                                        document.getElementById("statki").removeChild(kolorczarmystatek[y])
+                                        y--
+                                    }
+                                }
+                                for (var i = 0; i < statki.tablicaklas.length - 1; i++) {
+                                    if (statki.tablicaklas[i] == liczbaklasy) statki.tablicaklas.splice(i, 1)
+                                }
+                                liczbaklasy = statki.tablicaklas[0]
+                                let iteracja = document.getElementsByClassName(liczbaklasy)
+                                statki.czarny = iteracja.length
+                                for (let x = 0; x < iteracja.length; x++) {
+                                    iteracja[x].style.backgroundColor = "black"
+                                }
+                            }
+                            if(document.getElementById("statki").children.length == 0) statki.startgiereczki()
+                        })
+                        if (this.podglad) div.innerHTML = this.gracz[i][j]
+                        if (this.gracz[i][j] != 0) div.classList.add("black")
+                        document.getElementById("ur").appendChild(div)
+
+                    }
+                }
+            },
+            pokaz: function () {
+                if (statki.liczbaprawklik % 2 == 0) {
+                    let tablicaidtargetu = []
+                    var liczek = 0;
+                    for (let i = 0; i < statki.czarny; i++) {
+                        if (+event.target.id <= 10 - statki.czarny) idtargetu = 0 + "" + (parseInt(event.target.id) + i)
+                        else if (+event.target.id[1] > 10 - statki.czarny && +event.target.id[0] > 0) idtargetu = parseInt(+event.target.id[0] + "" + 0) + 10 - statki.czarny + i
+                        else if (+event.target.id[1] > 10 - statki.czarny && +event.target.id[0] == 0) idtargetu = 0 + "" + +(10 - statki.czarny + i)
+                        else idtargetu = +event.target.id + i
+                        tablicaidtargetu.push(idtargetu)
+                        for (let a = 0; a < 3; a++) {
+                            for (let b = 0; b < 3 ; b++) {
+                                if (statki.gracz[+((idtargetu.toString())[0])  + b][+((idtargetu.toString())[1]) + a] == 1)liczek++
+                            }
+                        }
+                        event.target.addEventListener("mouseout", statki.usun) 
+                        if (liczek > 0 && statki.czarny-1 == i) {
+                        for(let x = 0; x<tablicaidtargetu.length; x++){
+                            document.getElementById(tablicaidtargetu[x]).classList.add("red")
+                        }
+                        }
+                        else if (liczek == 0 && statki.czarny-1 == i) {
+                        for(let x = 0; x<tablicaidtargetu.length; x++){
+                            document.getElementById(tablicaidtargetu[x]).classList.add("green")
+                        }
+                        }
+                    }
+                }
+                else if (statki.liczbaprawklik % 2 == 1) {
+                    var liczek2 = 0;
+                    let tablicaidtargetu = []
+
+                    for (let i = 0; i < statki.czarny * 10; i = i + 10) {
+                        console.log(i)
+                        if (+event.target.id < 10) {
+                            idtargetu = 0 + "" + (parseInt(event.target.id) + i)
+                            if (i > 0) idtargetu = +event.target.id + i
+                        }
+                        else if (+event.target.id[0] > 10 - statki.czarny && +event.target.id > 10) idtargetu = parseInt(10 + "" + event.target.id[1]) - statki.czarny * 10 + i
+                        else idtargetu = +event.target.id + i
+                        for (let a = 0; a <  3; a++) {
+                            for (let b = 0; b < 3 ; b++) {
+                                if (statki.gracz[+((idtargetu.toString())[0]) + b][+((idtargetu.toString())[1]) + a] == 1) liczek2++
+                            }
+                        }
+                        tablicaidtargetu.push(idtargetu)
+                        if (liczek2 > 0 && (statki.czarny*10) - 10 == i){
+                            for(let x = 0; x<tablicaidtargetu.length; x++){
+                            document.getElementById(tablicaidtargetu[x]).classList.add("red")
+                            }
+                        } 
+                        else if(liczek2 == 0 && (statki.czarny*10) - 10 == i){
+                            for(let x = 0; x<tablicaidtargetu.length; x++){
+                            document.getElementById(tablicaidtargetu[x]).classList.add("green")
+                            }
+                        }
+                        event.target.addEventListener("mouseout", statki.usunpion)
+                    }
+                }
+            },
+            usun: function () {
+                for (let j = 0; j < statki.czarny; j++) {
+                    if (+event.target.id <= 10 - statki.czarny) idtargetu = 0 + "" + (parseInt(event.target.id) + j)
+                    else if (+event.target.id[1] > 10 - statki.czarny && +event.target.id[0] > 0) idtargetu = parseInt(+event.target.id[0] + "" + 0) + 10 - statki.czarny + j
+                    else if (+event.target.id[1] > 10 - statki.czarny && +event.target.id[0] == 0) idtargetu = 0 + "" + +(10 - statki.czarny + j)
+                    else idtargetu = +event.target.id + j
+                    document.getElementById(idtargetu).classList.remove("green")
+                    document.getElementById(idtargetu).classList.remove("red")
+                }
+            },
+            usunpion: function () {
+                for (let j = 0; j < statki.czarny * 10; j = j + 10) {
+                    if (+event.target.id < 10) {
+                        idtargetu = 0 + "" + (parseInt(event.target.id) + j)
+                        if (j > 0) idtargetu = +event.target.id + j
+                    }
+                    else if (+event.target.id[0] > 10 - statki.czarny && +event.target.id > 10) idtargetu = parseInt(10 + "" + event.target.id[1]) - statki.czarny * 10 + j
+                    else idtargetu = +event.target.id + j
+                    document.getElementById(idtargetu).classList.remove("green")
+                    document.getElementById(idtargetu).classList.remove("red")
+                }
+            },
+            komp: [],
+            tablica: function () {
+                for (var i = 0; i < 12; i++) {
+                    this.komp[i] = [], this.gracz[i] = []
+                    for (var j = 0; j < 12; j++) {
+                        this.komp[i][j] = 0, this.gracz[i][j] = 0
+                    }
+                }
+                this.miejsce()
+            },
+            html: function () {
+                for (var i = 1; i < 11; i++) {
+                    for (var j = 1; j < 11; j++) {
+                        var div = document.createElement("div")
+                        //f(this.komp[i][j]==1) div.classList.add("black")
+                        document.getElementById("comp").appendChild(div)
+                    }
+                }
+            },
+            miejsce: function () {
+                for (let i = 0; i < this.maszty.length; i++) {
+                    var x = 1 + Math.round(Math.random() * 9) // losowanie od 1 do 10
+                    var y = 1 + Math.round(Math.random() * 9)
+                    let kier = 0 + Math.round(Math.random() * 1) //kierunek 0 poziomy 1 pionowy
+                    for (let j = 0; j < this.maszty[i]; j++) {
+                        if (x > 11 - this.maszty[i]
+                            || y > 11 - this.maszty[i]) {
+                            i--
+                            break
+                        }
+                        else {
+                            let d = 0
+                            if (j == 0) {
+                                for (let a = 0; a < 3; a++) {
+                                    for (let b = 0; b < this.maszty[i] + 2; b++) {
+                                        if (kier == 0 && this.komp[x - 1 + b][y - 1 + a] == 1) d++
+                                        if (kier == 1 && this.komp[x - 1 + a][y - 1 + b] == 1) d++
+                                    }
+                                }
+                            }
+                            if (d > 0) {
+                                i--
+                                break
+                            }
+                            if (kier == 0) this.komp[x + j][y] = 1
+                            else this.komp[x][y + j] = 1
+                        }
+                    }
+                }
+                this.html()
+            },
+            startgiereczki: function() {
+                var button = document.createElement("BUTTON")
+                button.innerHTML = "ROZPOCZNJI GRĘ"
+                document.getElementById("statki").appendChild(button)
+                button.addEventListener("click", statki.strzelanie, false)
+            },
+            tablicabotadiv: [],
+            y: 0,
+            strzelanie: function(){
+                document.getElementsByTagName("button")[0].removeEventListener("click", arguments.callee);
+                let x = 0
+                for(let i = 0; i < 10; i++){
+                    for(let j = 0; j < 10; j++){
+                        statki.tablicabotadiv.push(i+""+j)
+                        document.getElementById("comp").children[+(i+""+j)].addEventListener("click", function(){
+                        if(statki.y % 2 == 0){
+                            document.getElementById("comp").children[+(i+""+j)].removeEventListener("click", arguments.callee)
+                            if(statki.komp[i+1][j+1] == 1)  {
+                            document.getElementById("comp").children[+(i+""+j)].innerHTML = "X"
+                            x++
+                                if(x == 20){
+                                alert("wygrałeś")
+                                }
+                        }
+                            else document.getElementById("comp").children[+(i+""+j)].innerHTML = "O"
+                            statki.y++
+                            statki.strzelającybot()
+                        } 
+                        else alert("PROSZĘ ZWOLNIĆ// SEKUNDA ODSTĘPU")
+                    })
+                }
+                }
+            },
+            marek: 0,
+            strzelającybot: function(){
+                setTimeout(function() {
+                            let c = 0 
+                            let b = Math.floor(Math.random()*(statki.tablicabotadiv.length))
+                             if(statki.gracz[+((statki.tablicabotadiv[b])[0])+1][+((statki.tablicabotadiv[b])[1])+1] == 1) {
+                                 document.getElementById(statki.tablicabotadiv[b]).innerHTML = "X"
+                                 statki.marek++
+                                 if(statki.marek == 20){
+                                     alert("BOT WYGRAŁ")
+                                 }
+                             }
+                             else document.getElementById(statki.tablicabotadiv[b]).innerHTML = "O"
+                            statki.tablicabotadiv.splice(b,1)
+                            statki.y++
+                        }, 1000);
+            },
+        }
+        statki.tablica()
+        statki.htmlgracz()
+        statki.statki()
+    </script>
+</body>
+</html>
